@@ -11,6 +11,10 @@
 
 import 'package:flutter/material.dart';
 
+import 'pages/home/home.dart';
+import 'pages/location/location.dart';
+import 'pages/notification/notification.dart';
+
 void main() => runApp(MyApp());
 
 /// This Widget is the main application widget.
@@ -35,22 +39,52 @@ class MyStatefulWidget extends StatefulWidget {
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text(
-      'Index 0: Home',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 1: Business',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
-  ];
+
+  Widget _callContainerPage(int currentPage) {
+      switch (currentPage) {
+        case 0:
+          return HomePage();
+        case 1:
+          return LocationPage();
+        case 2:
+          return null;
+
+        case 3:
+          return NotificationPage();
+
+        case 4:
+          return NotificationPage();
+        default:
+          return null;
+      }
+  }
+
+  Widget _appBarcontainer() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+//      leading: Builder(
+//          builder: (BuildContext contex) {
+//              return  IconButton(
+//                icon: Icon(
+//                    Icons.menu,
+//                    color: Colors.grey),
+//                onPressed: () {
+//                },
+//              );
+//          }),
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(
+              Icons.more_vert,
+              color: Colors.grey),
+          onPressed: () {
+
+          },
+        ),
+      ],
+    );
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -61,29 +95,61 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('BottomNavigationBar Sample'),
-      ),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      body: _callContainerPage(_selectedIndex),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () { },
+        backgroundColor: Colors.deepPurpleAccent,
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+        elevation: 2.0,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('Homes'),
+        showUnselectedLabels: false,
+        showSelectedLabels: false,
+        iconSize: 23,
+        type: BottomNavigationBarType.fixed,
+        unselectedItemColor: Colors.grey,
+        items: [
+         new BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            title: Text(''),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            title: Text('Business'),
+         new BottomNavigationBarItem(
+           icon: Icon(Icons.location_on),
+           title: Text(''),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            title: Text('School'),
+         new BottomNavigationBarItem(
+           icon: Icon(Icons.dashboard, color: Colors.transparent),
+           title: Text(''),
+         ),
+         new BottomNavigationBarItem(
+            icon: new Stack(children: <Widget>[
+              new Icon(Icons.notifications),
+              new Positioned(
+                  top: -1.0,
+                  right: -1.0,
+                  child: new Stack(
+                    children: <Widget>[
+                      new Icon(
+                        Icons.brightness_1,
+                        size: 12.0,
+                        color: const Color(0xFF2845E7),
+                      ),
+                    ],
+                  )
+                )
+              ]
+            ),
+            title: Text(''),
           ),
+         new BottomNavigationBarItem(
+           icon: Icon(Icons.account_circle),
+           title: Text(''),
+         ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.cyanAccent[400],
+        selectedItemColor: Colors.deepPurple,
         onTap: _onItemTapped,
       ),
     );
