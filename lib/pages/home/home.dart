@@ -1,9 +1,75 @@
 import 'dart:developer';
 
-import 'package:appmigo_f/component/cuntom_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class HomePage extends StatelessWidget {
+import 'component/cuntom_shape.dart';
+import 'component/radial_painter.dart';
+
+
+
+class HomePage extends StatefulWidget {
+
+  HomePage({Key key}) : super(key: key);
+  @override
+  _HomePageState createState() => _HomePageState();
+
+}
+
+class _HomePageState extends State<HomePage> {
+
+  var selectedvigiaAppmigo = 1;
+  var covert = [];
+  double widthbox = 150;
+
+  var fire_covert = Firestore.instance.collection('LOCATION').document("10000").collection("COVERT");
+
+  void _dataInitial() {
+    List data = [
+      {'name': 'Mi Ubicacion',
+        'value': 1,'id': '001' ,'icon': 59391},
+      {'name': 'Mi Casa', 'icon': 59530,
+        'value': 2,'definido': false },
+      {'name': 'Lugar de Trabajo', 'icon': 59530,
+        'value': 3,'definido': false },
+      { 'name': 'Agregar',
+        'value': 0,'icon': 57669},
+    ];
+    data.forEach((e) {
+      fire_covert.document('${e['value']}').setData(e);
+    });
+  }
+  void _registrarData() {
+    print("Carogoo");
+    var snap = fire_covert.getDocuments();
+    snap.then((docs) {
+      setState(() {
+        covert = docs.documents.toList();
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    _dataInitial();
+    _registrarData();
+    super.initState();
+  }
+
+  void _changeSelecteItem(int index) {
+    if (index == 0) {
+      print("Eso");
+      fire_covert.document('${covert.length}').setData({
+        'name': 'Otra',
+        'value': covert.length,'icon': 59391}
+      );
+      _registrarData();
+    } else {
+      setState(() {
+        selectedvigiaAppmigo = index;
+      });
+    }
+  }
 
   Widget _buildGradientContailner(double width, double height) {
     return Align(
@@ -47,33 +113,32 @@ class HomePage extends StatelessWidget {
 
                             },
                           ),
-                          SizedBox(width: 16),
+                          SizedBox(width: 10),
                           PopupMenuButton(
-                            child: Row(
-                              children: <Widget>[
-                                Text("Yo", style: TextStyle(color: Colors.white)),
-                                Icon(Icons.person_outline, color: Colors.white)
-                              ],
-                            ),
-                              itemBuilder: (BuildContext contex) => <PopupMenuItem<int>> [
-                                PopupMenuItem(
-                                    child: Text("Yo"),
-                                ),
-                                PopupMenuItem(
-                                  child: Text("Mi Casa"),
-                                ),
-                                PopupMenuItem(
-                                  child: Text("Lugar de Trabajo"),
-                                ),
-                                PopupMenuItem(
-                                  child: Row(
-                                    children: <Widget>[
-                                      Icon(Icons.add),
-                                      Text("Agregar")
-                                    ],
-                                  ),
-                                )
-                              ]
+                              onSelected: (index) {
+                                _changeSelecteItem(index);
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  Text( covert.length != 0 ? covert[selectedvigiaAppmigo].data['name'] : 'load' , style: TextStyle(color: Colors.white)), SizedBox(width: 10),
+                                  Icon( covert.length != 0 ? IconData(covert[selectedvigiaAppmigo].data['icon'], fontFamily: 'MaterialIcons') : Icons.cached , color: Colors.white)
+                                ],
+                              ),
+                              itemBuilder: (BuildContext contex) {
+                                if (covert.length != 0) {
+                                  return covert.map((item) {
+                                    return PopupMenuItem(
+                                      value: item.data['value'],
+                                      child:  item.data['icon'] == 57669 ? Row(
+                                        children: <Widget>[
+                                          Icon(IconData(item.data['icon'], fontFamily: 'MaterialIcons')),
+                                          Text(item.data['name'])
+                                        ],
+                                      ) : Text(item.data['name']),
+                                    );
+                                  }).toList();
+                                }
+                              }
                           )
                         ],
                       ),
@@ -92,16 +157,15 @@ class HomePage extends StatelessWidget {
                   child: Text(
                     "Por el momento todo esta en orden",
                     style: TextStyle(
-                      fontSize: 24,
-                      fontFamily: "Comforta",
-                      color: Colors.white
+                        fontSize: 24,
+                        fontFamily: "Comforta",
+                        color: Colors.white
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
-
                 )
               ],
             ),
@@ -109,6 +173,17 @@ class HomePage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  _renderBoxItems(int index, double heigbox) {
+    switch(index) {
+      case 0:
+        return RadialGrade();
+      case 1:
+        return null;
+      default:
+        return Text(index.toString());
+    }
   }
 
   @override
@@ -134,7 +209,7 @@ class HomePage extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(left: 35.0, bottom: 60.0),
                       child: SizedBox(
-                        width: 150,
+                        width: widthbox,
                         child: Stack(
                           fit: StackFit.expand,
                           children: <Widget>[
@@ -156,10 +231,10 @@ class HomePage extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 50.0),
-                                    child: Text("$index"),
-                                  )
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 50.0),
+                                  child: _renderBoxItems(index, height),
+                                )
                               ],
                             )
                           ],
@@ -174,4 +249,9 @@ class HomePage extends StatelessWidget {
       },
     );
   }
+
+
 }
+
+
+
